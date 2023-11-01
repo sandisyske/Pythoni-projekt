@@ -1,3 +1,4 @@
+#Taustad
 import pygame
 # import pygame.locals for easier 
 # access to key coordinates
