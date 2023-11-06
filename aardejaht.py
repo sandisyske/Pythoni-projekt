@@ -76,7 +76,6 @@ class Tegelane(pygame.sprite.Sprite):
         self.fall_count = 0
          
 
-
     def move(self, dx, dy):
         self.rect.x += dx
         self.rect.y += dy
@@ -88,7 +87,6 @@ class Tegelane(pygame.sprite.Sprite):
             self.animation_count = 0
     
     
-
     def move_right(self, vel):
         self.x_vel = vel
         if self.direction != "right":
@@ -97,6 +95,7 @@ class Tegelane(pygame.sprite.Sprite):
 
 
     def loop(self, fps):
+        #gravitatsiooni ei saa sise veel panna
         #self.y_vel += min(1, self.fall_count/ fps) * self.GRAVITY
         self.move(self.x_vel, self.y_vel)
 
@@ -112,12 +111,17 @@ class Tegelane(pygame.sprite.Sprite):
 
         sprite_sheet_name = sprite_sheet + "_" + self.direction
         sprites = self.SPRITES[sprite_sheet_name]
-        sprite_index = (self.animation_count // self.ANIMATION_DELAY) % len(sprites)
+        sprite_index = (self.animation_count // 
+                        self.ANIMATION_DELAY) % len(sprites)
         self.sprite = sprites[sprite_index]
         self.animation_count += 1
+        self.update()
 
 
-
+    # update the retangle
+    def update(self):
+        self.rect = self.sprite.get_rect(topleft=(self.rect.x, self.rect.y))
+        self.mask = pygame.mask.from_surface(self.sprite)
 
 
     def draw(self, win):
