@@ -6,6 +6,12 @@ import math
 from os import listdir
 from os.path import isfile, join
 
+
+"""
+https://www.youtube.com/watch?v=B6DrRN5z_uU
+Jäin pooleli 57:35 terrain ja gravitatsioon
+"""
+
 pygame.init()
 
 pygame.display.set_caption("Aardejaht")
