@@ -1,5 +1,5 @@
 import os
-from typing import Any
+from typing import Any, Self
 import pygame
 import random
 import math
@@ -29,6 +29,7 @@ PLAYER_VEL = 4
 
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 
+idle = True
 
 # funktsioon, mis keerab tegelase pildi
 def flip(sprites):
@@ -69,7 +70,16 @@ def get_block(size):
     rect = pygame.Rect(0, 0, size, size)
     surface.blit(image, (0, 0), rect)
     return pygame.transform.scale2x(surface)
-
+"""
+# trepi asukoht ja suurus
+def get_trepp(size):
+    path = join("Assets", "Backround", "terrain.png")
+    image = pygame.image.load(path).convert_alpha()
+    surface = pygame.Surface((size, size), pygame.SRCALPHA, 32)
+    rect = pygame.Rect(48, 0, size, size)
+    surface.blit(image, (0, 0), rect)
+    return pygame.transform.scale2x(surface)
+"""
 
 #player
 class Tegelane(pygame.sprite.Sprite):
@@ -79,7 +89,7 @@ class Tegelane(pygame.sprite.Sprite):
     # kasuta sprite pilte
     SPRITES = load_sprite_sheets("Tegelased", "Rebane", 32, 32, True)
     # delay between sprites
-    ANIMATION_DELAY =12
+    ANIMATION_DELAY = 6
 
     def __init__(self, x, y, width, height):
         super().__init__()
@@ -98,7 +108,7 @@ class Tegelane(pygame.sprite.Sprite):
         self.jump_count += 1
         if self.jump_count == 1:
             self.fall_count = 0
-        
+
 
     def move(self, dx, dy):
         self.rect.x += dx
@@ -116,7 +126,6 @@ class Tegelane(pygame.sprite.Sprite):
         if self.direction != "right":
             self.direction = "right"
             self.animation_count = 0
-
 
 
     def loop(self, fps):
@@ -142,6 +151,8 @@ class Tegelane(pygame.sprite.Sprite):
     # animatsiooni uuendamine iga frame
     def update_sprite(self):
         sprite_sheet = "idle"
+
+    
         if self.y_vel < 0:
             if self.jump_count == 1:
                 sprite_sheet = "jump"
@@ -151,10 +162,12 @@ class Tegelane(pygame.sprite.Sprite):
         elif self.y_vel > self.GRAVITY * 2:
             sprite_sheet = "fall"
 
-
         elif self.x_vel != 0:
             sprite_sheet = "run"
-        
+      
+        elif pygame.key.get_pressed()[pygame.K_DOWN]:
+            sprite_sheet = "dig" 
+            
 
         sprite_sheet_name = sprite_sheet + "_" + self.direction
         sprites = self.SPRITES[sprite_sheet_name]
@@ -162,9 +175,9 @@ class Tegelane(pygame.sprite.Sprite):
                         self.ANIMATION_DELAY) % len(sprites)
         self.sprite = sprites[sprite_index]
         self.animation_count += 1
-        if sprite_sheet == "jump" and self.animation_count == 5:
-            sprite_sheet = "fall"
+
         self.update()
+        return sprites
 
 
     # update the retangle
@@ -198,8 +211,14 @@ class Block(Object):
         self.image.blit(block, (0, 0))
         self.mask = pygame.mask.from_surface(self.image)
 
-
-
+"""
+class Trepp(Object):
+    def __init__(self, x, y, size):
+        super().__init__(x, y, size, size)
+        trepp = get_trepp(size)
+        self.image.blit(trepp, (0, 0))
+        self.mask = pygame.mask.from_surface(self.image)
+"""
 #taust
 def taust(name):
     image = pygame.image.load(join("Assets", "Backround", name))
@@ -270,28 +289,39 @@ def handle_move(rebane, objects):
         rebane.move_left(PLAYER_VEL)
     if keys[pygame.K_RIGHT] and not collide_right:
         rebane.move_right(PLAYER_VEL)
+    ###### aaaaaaa   
 
-    handle_vertical_collision(rebane, objects, rebane.y_vel)
+    vertical_collide = handle_vertical_collision(rebane, objects, rebane.y_vel)
+    to_check = [collide_left, collide_right, *vertical_collide]
 
+#few variables, because i didnt know where else to put them
+#dig = False
+#dig_burrow = False
 
 def main (window):
     clock = pygame.time.Clock()
     backround, bg_image = taust("taust.png")
 
     block_size = 48
+    
+
 
     rebane = Tegelane(100, 100, 50, 50)
+
+    
     floor = [Block(i*block_size, HEIGHT - block_size, block_size) 
              for i in range (-WIDTH // block_size, (WIDTH * 2) // block_size)]
-    objects = [*floor, Block(0, HEIGHT - block_size * 2, block_size), 
-               Block(block_size * 3, HEIGHT - block_size * 4, block_size)]
+    objects = [*floor, Block(block_size, HEIGHT - block_size * 4, block_size), 
+               Block(block_size * 6, HEIGHT - block_size * 2, block_size)]
     offset_x = 0
     scroll_area_width = 200
+    dig = True
 
     run = True
     while run:
         clock.tick(FPS)
 
+    
 
         #events
         for event in pygame.event.get():
@@ -302,6 +332,9 @@ def main (window):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP and rebane.jump_count < 2:
                     rebane.jump()
+        
+
+        
 
         rebane.loop(FPS)
         handle_move(rebane, objects)
