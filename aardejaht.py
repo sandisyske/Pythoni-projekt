@@ -21,7 +21,7 @@ WHITE = (255, 255, 255)
 GRAVITY = 2
 
 #screen
-WIDTH, HEIGHT = 1000, 800
+WIDTH, HEIGHT = 800, 600
 FPS = 60
 PLAYER_VEL = 4
 
@@ -303,7 +303,7 @@ def main (window):
     block_size = 48
 
 #rebase asukoht !!!
-    rebane = Tegelane(100, 632, 50, 50)
+    rebane = Tegelane(100, 400, 50, 50)
 
     # blokkide asukohad # seda saab kindlasti paremini teha, saab ka csv failiga sisse lugeda mapi, later to do
     floor = [Block(i*block_size, HEIGHT - block_size, block_size) 
