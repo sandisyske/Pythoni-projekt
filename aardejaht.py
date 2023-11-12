@@ -7,14 +7,12 @@ from os import listdir
 from os.path import isfile, join
 
 
-"""
-https://www.youtube.com/watch?v=B6DrRN5z_uU
-Jäin pooleli 57:35 terrain ja gravitatsioon
-"""
+
 
 pygame.init()
 
 pygame.display.set_caption("Aardejaht")
+
 
 # Set colors
 WHITE = (255, 255, 255)
@@ -211,40 +209,42 @@ class Block(Object):
         self.image.blit(block, (0, 0))
         self.mask = pygame.mask.from_surface(self.image)
 
-"""
-class Trepp(Object):
-    def __init__(self, x, y, size):
-        super().__init__(x, y, size, size)
-        trepp = get_trepp(size)
-        self.image.blit(trepp, (0, 0))
-        self.mask = pygame.mask.from_surface(self.image)
-"""
+#taustapildid
+pine1 = pygame.image.load("Assets/Backround/pine1.png").convert_alpha()
+pine2 = pygame.image.load("Assets/Backround/pine2.png").convert_alpha()
+mountain = pygame.image.load("Assets/Backround/mountain.png").convert_alpha()
+sky = pygame.image.load("Assets/Backround/sky.png").convert_alpha()
+
+
+
+scroll = 0
 #taust
-def taust(name):
-    image = pygame.image.load(join("Assets", "Backround", name))
-    _, _, width, height = image.get_rect()
-    tiles =[]
+def draw_bg():
+    width_bg = sky.get_width()
+    for x in range(4):
 
-    for i in range(WIDTH // width + 1):
-        for j in range(HEIGHT // height + 1):
-            pos = (i*width, j*height)
-            tiles.append(pos)
-    return tiles, image
+        window.blit(sky, (scroll, 0))
+        window.blit(mountain, (scroll, HEIGHT - mountain.get_height() - 180))
+        window.blit(pine1, (scroll, HEIGHT - pine1.get_height() - 80))
+        window.blit(pine2, (scroll, HEIGHT - pine2.get_height()))
 
 
 
-def draw(window, backround, bg_image, rebane, objects, offset_x):
 
-    for tile in backround:
-        window.blit(bg_image, tile)
-
+def draw(window, rebane, objects, offset_x):
+    draw_bg()
     for obj in objects:
         obj.draw(window, offset_x)
-
+    
     rebane.draw(window, offset_x)
+    
 
     pygame.display.update()
-
+"""
+    for tile in backround:
+        window.blit(bg_image, tile)
+"""
+    
 def handle_vertical_collision(rebane, objects, dy):
     collided_objects = []
     for obj in objects:
@@ -274,8 +274,6 @@ def collide(rebane, objects, dx):
     return collided_object
 
 
-
-
 #move ja collision
 def handle_move(rebane, objects):
     keys = pygame.key.get_pressed()
@@ -294,28 +292,38 @@ def handle_move(rebane, objects):
     vertical_collide = handle_vertical_collision(rebane, objects, rebane.y_vel)
     to_check = [collide_left, collide_right, *vertical_collide]
 
-#few variables, because i didnt know where else to put them
-#dig = False
-#dig_burrow = False
 
 def main (window):
     clock = pygame.time.Clock()
-    backround, bg_image = taust("taust.png")
+    
 
+    #backround, bg_image = taust("taust.png")
+
+    #blokid
     block_size = 48
-    
 
+#rebase asukoht !!!
+    rebane = Tegelane(100, 632, 50, 50)
 
-    rebane = Tegelane(100, 100, 50, 50)
-
-    
+    # blokkide asukohad # seda saab kindlasti paremini teha, saab ka csv failiga sisse lugeda mapi, later to do
     floor = [Block(i*block_size, HEIGHT - block_size, block_size) 
              for i in range (-WIDTH // block_size, (WIDTH * 2) // block_size)]
     objects = [*floor, Block(block_size, HEIGHT - block_size * 4, block_size), 
-               Block(block_size * 6, HEIGHT - block_size * 2, block_size)]
+               Block(block_size * (13), HEIGHT - block_size * 6, block_size),
+               Block(block_size * (14), HEIGHT - block_size * 6, block_size),
+               Block(block_size * (15), HEIGHT - block_size * 6, block_size),
+               Block(block_size * (15), HEIGHT - block_size * 7, block_size),
+               Block(block_size * (14), HEIGHT - block_size * 7, block_size),
+               Block(block_size * (16), HEIGHT - block_size * 7, block_size),
+               Block(block_size * (7), HEIGHT - block_size * 7, block_size), 
+               Block(block_size * (8), HEIGHT - block_size * 7, block_size), 
+               Block(block_size * (4), HEIGHT - block_size * 6, block_size),
+               Block(block_size * (3), HEIGHT - block_size * 6, block_size),
+               Block(block_size * (-2), HEIGHT - block_size * 2, block_size)]
     offset_x = 0
     scroll_area_width = 200
-    dig = True
+    
+
 
     run = True
     while run:
@@ -338,11 +346,16 @@ def main (window):
 
         rebane.loop(FPS)
         handle_move(rebane, objects)
-        draw(window, backround, bg_image, rebane, objects, offset_x)
+        #draw_bg()
+        draw(window, rebane, objects, offset_x)
 
+      
+
+        
         if ((rebane.rect.right - offset_x >= WIDTH - scroll_area_width) and rebane.x_vel > 0) or (
                 (rebane.rect.left - offset_x <= scroll_area_width) and rebane.x_vel < 0):
             offset_x += rebane.x_vel
+        pygame.display.update()
 
     pygame.quit()
     quit()
