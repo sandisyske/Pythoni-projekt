@@ -6,9 +6,11 @@ class Game:
         pygame.init()
 
         pygame.display.set_caption('aardejaht') #ekraani nimi
-        screen = pygame.display.set_mode((640, 480))
+        self.screen = pygame.display.set_mode((640, 480))
 
-        clock = pygame.time.Clock()
+        self.clock = pygame.time.Clock() # ekraani nimi
+
+        self.img = pygame.image.load("data/images/clouds/cloud_1")
 
     def run(self):
         while True:
