@@ -1,50 +1,60 @@
-import pygame
 import sys
-from skriptid.entities import PhysicsEntity #võtame skriptide kasutast teise .py faili
+
+import pygame
+
 from skriptid.utils import load_image, load_images
+from skriptid.entities import PhysicsEntity
 from skriptid.tilemap import Tilemap
 
 class Game:
     def __init__(self):
         pygame.init()
 
-        pygame.display.set_caption('aardejaht') #ekraani nimi
+        pygame.display.set_caption('ninja game')#ekraani nimi
         self.screen = pygame.display.set_mode((640, 480))
         self.display = pygame.Surface((320, 240))
 
-        self.clock = pygame.time.Clock() # ekraani nimi
-
+        self.clock = pygame.time.Clock()
+        
         self.movement = [False, False]
-
+        
         self.assets = {
             'decor': load_images('tiles/decor'),
             'grass': load_images('tiles/grass'),
             'large_decor': load_images('tiles/large_decor'),
             'stone': load_images('tiles/stone'),
-            "player": load_image("entities/player.png")
+            'player': load_image('entities/player.png'),
+            'background': load_image('background.png'),
         }
 
         # TEGELANE
-        self.player = PhysicsEntity(self, "player", (50, 50), (8, 15))
+        self.player = PhysicsEntity(self, 'player', (50, 50), (8, 15))
         
         self.tilemap = Tilemap(self, tile_size=16)
 
+        # scrol variable et liigutada ekraani
+        self.scroll = [0, 0]
 
     def run(self):
         while True:
+            #tausta värvus
+            self.display.blit(self.assets['background'], (0, 0))
 
-            #clear backround
-            self.display.fill((180, 240, 230))
+            # kaamera liigutamine tegelase ligidal
+            self.scroll[0] += (self.player.rect().centerx - self.display.get_width() / 2 - self.scroll[0]) / 30
+            self.scroll[1] += (self.player.rect().centery - self.display.get_height() / 2 - self.scroll[1]) / 30
+            render_scroll = (int(self.scroll[0]), int(self.scroll[1])) # et tegelane ei põrkaks ringi, kui talle määrataske float asukoht
 
-            self.tilemap.render(self.display)
 
+            
+            self.tilemap.render(self.display, offset=render_scroll)
+            
             self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
-            self.player.render(self.display)
+            self.player.render(self.display, offset=render_scroll)
+            
+            #kontrollida, mis ruudud playeri ümber on
+            #print(self.tilemap.physics_rects_around(self.player.pos))
 
-            print(self.tilemap.physics_rects_around(self.player.pos))
-
-            #COLLISIONS
-       
 
             # EVENTS
             for event in pygame.event.get():
@@ -56,6 +66,8 @@ class Game:
                         self.movement[1] = True
                     if event.key == pygame.K_LEFT:
                         self.movement[0] = True
+                    if event.key == pygame.K_UP:
+                        self.player.velocity[1] = -3
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_RIGHT:
