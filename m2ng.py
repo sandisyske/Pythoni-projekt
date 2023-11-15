@@ -2,8 +2,8 @@ import sys
 
 import pygame
 
-from skriptid.utils import load_image, load_images
-from skriptid.entities import PhysicsEntity
+from skriptid.utils import load_image, load_images, Animation
+from skriptid.entities import PhysicsEntity, Player
 from skriptid.tilemap import Tilemap
 
 class Game:
@@ -25,14 +25,21 @@ class Game:
             'stone': load_images('tiles/stone'),
             'player': load_image('entities/player.png'),
             'background': load_image('background.png'),
+            'player/idle': Animation(load_images('entities/player/idle'), img_dur=6),
+            'player/run': Animation(load_images('entities/player/run'), img_dur=4),
+            'player/jump': Animation(load_images('entities/player/jump')),
+            'player/slide': Animation(load_images('entities/player/slide')),
+            'player/wall_slide': Animation(load_images('entities/player/wall_slide'))
         }
+        print(self.assets)
 
         # TEGELANE
-        self.player = PhysicsEntity(self, 'player', (50, 50), (8, 15))
+        self.player = Player(self, (50, 50), (8, 15))
         
+        # MAP
         self.tilemap = Tilemap(self, tile_size=16)
 
-        # scrol variable et liigutada ekraani
+        # scroll variable et liigutada ekraani
         self.scroll = [0, 0]
 
     def run(self):
