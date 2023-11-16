@@ -10,7 +10,7 @@ class Game:
     def __init__(self):
         pygame.init()
 
-        pygame.display.set_caption('ninja game')#ekraani nimi
+        pygame.display.set_caption('aardejaht')#ekraani nimi
         self.screen = pygame.display.set_mode((640, 480))
         self.display = pygame.Surface((320, 240))
 
@@ -28,16 +28,14 @@ class Game:
             'player/idle': Animation(load_images('entities/player/idle'), img_dur=6),
             'player/run': Animation(load_images('entities/player/run'), img_dur=4),
             'player/jump': Animation(load_images('entities/player/jump')),
-            'player/slide': Animation(load_images('entities/player/slide')),
-            'player/wall_slide': Animation(load_images('entities/player/wall_slide'))
         }
-        print(self.assets)
 
         # TEGELANE
         self.player = Player(self, (50, 50), (8, 15))
         
         # MAP
         self.tilemap = Tilemap(self, tile_size=16)
+        self.tilemap.load('map.json')
 
         # scroll variable et liigutada ekraani
         self.scroll = [0, 0]
