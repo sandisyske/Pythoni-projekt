@@ -7,7 +7,7 @@ Aardejahi mängu eesmärk:
 
 Alfa versioon:
 * Esialgne versioon maailmast
-*  hetkeline tegelane, sest animatsioonidega tekkisid probleemid (tehtud uus tegelane=
+*  hetkeline tegelane, sest animatsioonidega tekkisid probleemid (tehtud uus tegelane)
 * mängu füüsika (gravitatsioon, collidimine plokkidega, kaamera liikumine)
 * tegelase liigutamine maailmas
 
