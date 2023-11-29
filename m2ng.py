@@ -30,8 +30,11 @@ class Game:
             'player/jump': Animation(load_images('entities/player/jump')),
         }
 
-        # TEGELANE
+        # PEATEGELANE
         self.player = Player(self, (50, 50), (8, 15))
+        
+        # MÄNGU TEGELASED
+        
         
         # MAP
         self.tilemap = Tilemap(self, tile_size=16)
