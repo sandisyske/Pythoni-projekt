@@ -28,6 +28,7 @@ class Game:
             'player/idle': Animation(load_images('entities/player/idle'), img_dur=6),
             'player/run': Animation(load_images('entities/player/run'), img_dur=4),
             'player/jump': Animation(load_images('entities/player/jump')),
+            'player/wall_slide': Animation(load_images('entities/player/wall_slide'))
         }
 
         # PEATEGELANE
@@ -75,7 +76,7 @@ class Game:
                     if event.key == pygame.K_LEFT:
                         self.movement[0] = True
                     if event.key == pygame.K_UP:
-                        self.player.velocity[1] = -3
+                        self.player.jump()
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_RIGHT:
