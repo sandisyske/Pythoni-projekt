@@ -23,6 +23,7 @@ class Game:
             'grass': load_images('tiles/grass'),
             'large_decor': load_images('tiles/large_decor'),
             'stone': load_images('tiles/stone'),
+            #'cave': load_image('tiles/cave'),
             'player': load_image('entities/player.png'),
             'background': load_image('background.png'),
             'player/idle': Animation(load_images('entities/player/idle'), img_dur=6),
