@@ -78,6 +78,10 @@ class Game:
                         self.movement[0] = True
                     if event.key == pygame.K_UP:
                         self.player.jump()
+                    if event.key == pygame.K_ESCAPE:
+                        print("Mäng on sulgunud!")
+                        pygame.quit()
+                        sys.exit()
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_RIGHT:
