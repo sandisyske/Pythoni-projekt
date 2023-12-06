@@ -1,10 +1,12 @@
 import sys
-
+import random
 import pygame
+import math
 
 from skriptid.utils import load_image, load_images, Animation
 from skriptid.entities import PhysicsEntity, Player
 from skriptid.tilemap import Tilemap
+from skriptid.particles import Particle
 
 class Game:
     def __init__(self):
@@ -23,13 +25,13 @@ class Game:
             'grass': load_images('tiles/grass'),
             'large_decor': load_images('tiles/large_decor'),
             'stone': load_images('tiles/stone'),
-            #'cave': load_image('tiles/cave'),
             'player': load_image('entities/player.png'),
             'background': load_image('background.png'),
             'player/idle': Animation(load_images('entities/player/idle'), img_dur=6),
             'player/run': Animation(load_images('entities/player/run'), img_dur=4),
             'player/jump': Animation(load_images('entities/player/jump')),
-            'player/wall_slide': Animation(load_images('entities/player/wall_slide'))
+            'player/wall_slide': Animation(load_images('entities/player/wall_slide')),
+            'particle/leaf': Animation(load_images('particles/leaf'), img_dur=20, loop=False),
         }
 
         # PEATEGELANE
@@ -41,6 +43,14 @@ class Game:
         # MAP
         self.tilemap = Tilemap(self, tile_size=16)
         self.tilemap.load('map.json')
+
+        #osakeste tekitamine
+        self.leaf_spawner = []
+        for tree in self.tilemap.extract([('large_decor', 5)], keep=True):
+            self.leaf_spawner.append(pygame.Rect(4 + tree['pos'][0], 4 + tree['pos'][1], 23, 13)) # lisab lehe_spawner listi puu Recti
+
+
+        self.particles = []
 
         # scroll variable et liigutada ekraani
         self.scroll = [0, 0]
@@ -55,7 +65,11 @@ class Game:
             self.scroll[1] += (self.player.rect().centery - self.display.get_height() / 2 - self.scroll[1]) / 30
             render_scroll = (int(self.scroll[0]), int(self.scroll[1])) # et tegelane ei põrkaks ringi, kui talle määrataske float asukoht
 
-
+            # osakeste spawner
+            for rect in self.leaf_spawner:
+                if random.random() * 49999 < rect.width *rect.height: # random.random() on suvaline arv 0 kuni 1, kontrollime kas see on väiksem kui meie piksel ruut alas # suure numbriga korrutamisel saame kindlad olla et lehti ei teki iga frame lõpmatuseni
+                    pos = (rect.x + random.random() * rect.width, rect.y + random.random() * rect.height)
+                    self.particles.append(Particle(self, 'leaf', pos, velocity=[-0.1, 0.3], frame=random.randint(0, 20))) # osakeste tekitamine toimub siin
             
             self.tilemap.render(self.display, offset=render_scroll)
             
@@ -65,6 +79,14 @@ class Game:
             #kontrollida, mis ruudud playeri ümber on
             #print(self.tilemap.physics_rects_around(self.player.pos))
 
+            #osakesed
+            for particle in self.particles.copy():
+                kill = particle.update()
+                particle.render(self.display, offset=render_scroll)
+                if particle.type == 'leaf':
+                    particle.pos[0] += math.sin(particle.animation.frame * 0.035) * 0.3
+                if kill:
+                    self.particles.remove(particle)
 
             # EVENTS
             for event in pygame.event.get():

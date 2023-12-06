@@ -1,19 +1,6 @@
 import pygame
 import json
 
-#auto-correcti jaoks
-AUTOTILE_MAP = {
-    tuple(sorted([(1, 0), (0, 1)])): 0,
-    tuple(sorted([(1, 0), (0, 1), (-1, 0)])): 1,
-    tuple(sorted([(-1, 0), (0, 1)])): 2, 
-    tuple(sorted([(-1, 0), (0, -1), (0, 1)])): 3,
-    tuple(sorted([(-1, 0), (0, -1)])): 4,
-    tuple(sorted([(-1, 0), (0, -1), (1, 0)])): 5,
-    tuple(sorted([(1, 0), (0, -1)])): 6,
-    tuple(sorted([(1, 0), (0, -1), (0, 1)])): 7,
-    tuple(sorted([(1, 0), (-1, 0), (0, 1), (0, -1)])): 8,
-}
-
 NEIGHBOR_OFFSETS = [(-1, 0), (-1, -1), (0, -1), (1, -1), (1, 0), (0, 0), (-1, 1), (0, 1), (1, 1)]
 PHYSICS_TILES = {"grass", "stone"}
 AUTOTILE_TYPES = {'grass', 'stone'}
@@ -24,6 +11,28 @@ class Tilemap:
         self.tile_size = tile_size
         self.tilemap = {}
         self.offgrid_tiles = []
+
+    # liikuvate animatsioonide asukoha määramine
+    def extract(self, id_pairs, keep=False):#kontrollime kas kindel element on id_pairs listis ja kui on siis tagastame selle listi
+        matches = []
+        for tile in self.offgrid_tiles.copy():
+            if (tile['type'], tile['variant']) in id_pairs:
+                matches.append(tile.copy())
+                if not keep: # kui ei kustuta seda elementi
+                    self.offgrid_tiles.remove(tile)
+
+        #teeme sama kontrolli tilemapi kohta
+        for loc in self.tilemap:
+            tile = self.tilemap[loc]
+            if (tile['type'], tile['variant']) in id_pairs:
+                matches.append(tile.copy())
+                matches[-1]['pos'] = matches[-1]['pos'].copy()
+                matches[-1]['pos'][0] *= self.tile_size # muudame koordinaadid piksliteks x 
+                matches[-1]['pos'][1] *= self.tile_size # y
+                if not keep:
+                    del self.tilemap[loc]
+
+        return matches
 
     #COLLISIONS
     def tiles_around(self, pos):
@@ -71,8 +80,7 @@ class Tilemap:
                     if self.tilemap[check_loc]['type'] == tile['type']:
                         neighbors.add(shift)
             neighbors = tuple(sorted(neighbors))
-            if (tile['type'] in AUTOTILE_TYPES) and (neighbors in AUTOTILE_MAP):
-                tile['variant'] = AUTOTILE_MAP[neighbors]
+            
 
     def render(self, surf, offset=(0, 0)):
         

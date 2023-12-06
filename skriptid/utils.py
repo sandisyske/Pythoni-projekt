@@ -1,6 +1,6 @@
 import os
 import pygame
-# Failide/piltide võtmine
+# Failide/piltide võtmine selles kaustast
 BASE_IMG_PATH = "data/images/"
 
 def load_image(path):
@@ -9,8 +9,8 @@ def load_image(path):
     return img
 
 def load_images(path):
-    images =  []
-    for img_name in sorted(os.listdir(BASE_IMG_PATH +  path)):
+    images = []
+    for img_name in sorted(os.listdir(BASE_IMG_PATH + path)):
         images.append(load_image(path + '/' + img_name))
     return images
 
@@ -21,7 +21,7 @@ class Animation:
         self.img_duration = img_dur
         self.done = False
         self.frame = 0
-
+    
     def copy(self):
         return Animation(self.images, self.img_duration, self.loop)
     
@@ -29,12 +29,10 @@ class Animation:
         if self.loop:
             self.frame = (self.frame + 1) % (self.img_duration * len(self.images)) # korda animatsioone
         else:
-            self.frame = min(self.frame + 1, self.img_duration + len(self.images) - 1)
-            if self.frame >= self.img_duration + len(self.images) - 1:
+            self.frame = min(self.frame + 1, self.img_duration * len(self.images) - 1)
+            if self.frame >= self.img_duration * len(self.images) - 1:
                 self.done = True
                 
-
-    
     # render animation
     def img(self):
         return self.images[int(self.frame / self.img_duration)] # kasuta game frame
