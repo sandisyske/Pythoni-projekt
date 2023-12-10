@@ -4,7 +4,7 @@ import pygame
 import math
 
 from skriptid.utils import load_image, load_images, Animation
-from skriptid.entities import PhysicsEntity, Player
+from skriptid.entities import PhysicsEntity, Player, Tegelane
 from skriptid.tilemap import Tilemap
 from skriptid.particles import Particle
 
@@ -26,19 +26,21 @@ class Game:
             'large_decor': load_images('tiles/large_decor'),
             'stone': load_images('tiles/stone'),
             'player': load_image('entities/player.png'),
+            'spawners': load_images('tiles/spawners'),
             'background': load_image('background.png'),
             'player/idle': Animation(load_images('entities/player/idle'), img_dur=6),
             'player/run': Animation(load_images('entities/player/run'), img_dur=4),
             'player/jump': Animation(load_images('entities/player/jump')),
             'player/wall_slide': Animation(load_images('entities/player/wall_slide')),
             'particle/leaf': Animation(load_images('particles/leaf'), img_dur=20, loop=False),
+            'tegelane1': load_image('entities/characters/karu.png'),
         }
 
         # PEATEGELANE
         self.player = Player(self, (50, 50), (8, 15))
         
         # MÄNGU TEGELASED
-        
+        #self.tegelane1 = Tegelane(self, (60, 50), (8, 15))
         
         # MAP
         self.tilemap = Tilemap(self, tile_size=16)
@@ -48,6 +50,8 @@ class Game:
         self.leaf_spawner = []
         for tree in self.tilemap.extract([('large_decor', 5)], keep=True):
             self.leaf_spawner.append(pygame.Rect(4 + tree['pos'][0], 4 + tree['pos'][1], 23, 13)) # lisab lehe_spawner listi puu Recti
+
+        # spawnerite tekitamine
 
 
         self.particles = []
