@@ -1,5 +1,6 @@
 # Characters
 import pygame
+import time
 
 class PhysicsEntity:
     def __init__(self, game, e_type, pos, size):
@@ -15,6 +16,7 @@ class PhysicsEntity:
         self.flip = False # pildi keeramiseks
         self.set_action('idle')
         self.last_movement = [0, 0]
+        
 
     # world colliding RECTANGLE
     def rect(self):
@@ -79,19 +81,24 @@ class PhysicsEntity:
 class Player(PhysicsEntity):
     def __init__(self, game, pos, size):
         super().__init__(game, 'player', pos, size)
-        self.air_time = 0
+        self.air_time = 0 # kontrollib kaua mängija on õhus olnud
         self.jumps = 2 #mitu hüpet saab teha õhus
         self.wall_slide = False
+        self.dig_time = 0
 
     def update(self, tilemap, movement=(0, 0)):
         super().update(tilemap, movement=movement)
-
+        
+        self.dig_time -= 1
         self.air_time += 1
         if self.collisions['down']:
             self.air_time = 0
+            self.digging = False
             self.jumps = 2 #peale igat põranda puudutust saab 2x hüpata
         
-        self.wall_slide = False #mida varem see selina puudutab, seda kiiremini liigub süsteem järgmise funktsiooni meetodi poole
+            
+        
+        self.wall_slide = False #mida varem see seina puudutab, seda kiiremini liigub süsteem järgmise funktsiooni meetodi poole
         if (self.collisions['right'] or self.collisions['left']) and self.air_time > 4:
             self.wall_slide = True
             self.velocity[1] = min(self.velocity[1], 0.5)
@@ -99,19 +106,23 @@ class Player(PhysicsEntity):
                 self.flip = False
             else:
                 self.flip = True
-            self. set_action('wall_slide')
+            self.set_action('wall_slide')
+
+            
 
         if not self.wall_slide:
             if self.air_time > 4:
                 self.set_action('jump')
             elif movement[0] != 0:
                 self.set_action('run')
+            elif self.dig_time > 0:
+                self.set_action('dig')
             else:
                 self.set_action('idle')
         
-        if self.velocity[0] > 0:
+        if self.velocity[0] > 0: # liigub vasakule
             self.velocity[0] = max(self.velocity[0] - 0.1, 0)
-        else:
+        else:                    # liigub paremale
             self.velocity[0] = min(self.velocity[0] + 0.1, 0)
 
     def jump(self):
@@ -125,14 +136,16 @@ class Player(PhysicsEntity):
             elif not self.flip and self.last_movement[0] > 0:
                 self.velocity[0] = -3.5
                 self.velocity[1] = -2.5
-                self.air_time = 5
+                self.air_time = 4
                 self.jumps = max(0, self.jumps - 1)
-                return True
-            
+                return True    
         elif self.jumps: #see rikub ära võimaluse hüpata rohkem kui lubatud hüpete arv on seadistatud korraga
             self.velocity[1] = -3
             self.jumps -= 1
             self.air_time = 5
+    
+    def dig(self):
+        self.dig_time = 100
 
 class Tegelane(PhysicsEntity):
     pass

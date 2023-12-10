@@ -29,13 +29,14 @@ class Game:
             'spawners': load_images('tiles/spawners'),
             'background': load_image('background.png'),
             'player/idle': Animation(load_images('entities/player/idle'), img_dur=6),
-            'player/run': Animation(load_images('entities/player/run'), img_dur=4),
-            'player/jump': Animation(load_images('entities/player/jump')),
+            'player/run': Animation(load_images('entities/player/run'), img_dur=6),
+            'player/jump': Animation(load_images('entities/player/jump'), img_dur=9, loop=False),
+            'player/dig': Animation(load_images('entities/player/dig'), img_dur=12, loop=False),
             'player/wall_slide': Animation(load_images('entities/player/wall_slide')),
             'particle/leaf': Animation(load_images('particles/leaf'), img_dur=20, loop=False),
             'tegelane1': load_image('entities/characters/karu.png'),
         }
-
+         #   'player/double_jump': Animation(load_images('entities/player/double_jump')),
         # PEATEGELANE
         self.player = Player(self, (50, 50), (8, 15))
         
@@ -104,6 +105,8 @@ class Game:
                         self.movement[0] = True
                     if event.key == pygame.K_UP:
                         self.player.jump()
+                    if event.key == pygame.K_DOWN:
+                        self.player.dig()
                     if event.key == pygame.K_ESCAPE:
                         print("Mäng on sulgunud!")
                         pygame.quit()
