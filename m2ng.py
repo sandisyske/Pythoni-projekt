@@ -4,7 +4,7 @@ import pygame
 import math
 
 from skriptid.utils import load_image, load_images, Animation
-from skriptid.entities import PhysicsEntity, Player, Tegelane
+from skriptid.entities import PhysicsEntity, Player, Karu, Konn
 from skriptid.tilemap import Tilemap
 from skriptid.particles import Particle
 
@@ -28,21 +28,23 @@ class Game:
             'player': load_image('entities/player.png'),
             'spawners': load_images('tiles/spawners'),
             'background': load_image('background.png'),
+            'karu/idle': Animation(load_images('entities/tegelane/karu/idle')),
+            'konn/idle': Animation(load_images('entities/tegelane/konn/idle')),
             'player/idle': Animation(load_images('entities/player/idle'), img_dur=6),
             'player/run': Animation(load_images('entities/player/run'), img_dur=6),
             'player/jump': Animation(load_images('entities/player/jump'), img_dur=9, loop=False),
             'player/dig': Animation(load_images('entities/player/dig'), img_dur=12, loop=False),
             'player/wall_slide': Animation(load_images('entities/player/wall_slide')),
             'particle/leaf': Animation(load_images('particles/leaf'), img_dur=20, loop=False),
-            'tegelane1': load_image('entities/characters/karu.png'),
+            #            'tegelane_konn/idle': Animation(load_images('entities/tegelane/konn/idle')),
+            
         }
-         #   'player/double_jump': Animation(load_images('entities/player/double_jump')),
+
         # PEATEGELANE
         self.player = Player(self, (50, 50), (8, 15))
         
         # MÄNGU TEGELASED
         #self.tegelane1 = Tegelane(self, (60, 50), (8, 15))
-        
         # MAP
         self.tilemap = Tilemap(self, tile_size=16)
         self.tilemap.load('map.json')
@@ -53,7 +55,16 @@ class Game:
             self.leaf_spawner.append(pygame.Rect(4 + tree['pos'][0], 4 + tree['pos'][1], 23, 13)) # lisab lehe_spawner listi puu Recti
 
         # spawnerite tekitamine
-
+        
+        self.tegelased = []
+        for spawner in self.tilemap.extract([('spawners', 0), ('spawners', 1), ('spawners', 2)]):
+            if spawner['variant'] == 0:
+                self.player.pos = spawner['pos']
+            elif spawner['variant'] == 1:
+                self.tegelased.append(Konn(self, spawner['pos'], (8, 15)))
+            else:
+                self.tegelased.append(Karu(self, spawner['pos'], (8, 15)))
+        
 
         self.particles = []
 
@@ -78,6 +89,10 @@ class Game:
             
             self.tilemap.render(self.display, offset=render_scroll)
             
+            for tegelane in self.tegelased.copy():
+                tegelane.update(self.tilemap, (0, 0))
+                tegelane.render(self.display, offset=render_scroll)
+
             self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
             self.player.render(self.display, offset=render_scroll)
             
