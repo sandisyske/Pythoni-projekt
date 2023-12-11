@@ -162,5 +162,5 @@ class Player(PhysicsEntity):
             self.air_time = 5
     
     def dig(self):
-        self.dig_time = 100
+        self.dig_time = 150
 

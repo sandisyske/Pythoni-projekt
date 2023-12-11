@@ -22,6 +22,6 @@ class Particle:
     def render(self, surf, offset=(0, 0)):
         img = self.animation.img()
         surf.blit(img, (self.pos[0] - offset[0] - img.get_width() // 2, self.pos[1] - offset[1] - img.get_height() // 2))
-    
+            
 #ligipääs mängule, osakese tüüp, asukoht, vel ja frame algus
         # kui animatsioon saab läbi, siis see lõppeb (kill on true kui animatsioon on framedest otsa saanud=)

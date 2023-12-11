@@ -36,6 +36,8 @@ class Game:
             'player/dig': Animation(load_images('entities/player/dig'), img_dur=12, loop=False),
             'player/wall_slide': Animation(load_images('entities/player/wall_slide')),
             'particle/leaf': Animation(load_images('particles/leaf'), img_dur=20, loop=False),
+            'particle/aare_1': Animation(load_images('particles/aare_1'), img_dur=14, loop=False),
+            'particle/aare_2': Animation(load_images('particles/aare_2'), img_dur=14, loop=False),
             #siia lisada aare particle lisana aare_1 ja aare_2
             #            'tegelane_konn/idle': Animation(load_images('entities/tegelane/konn/idle')),
             
@@ -56,7 +58,6 @@ class Game:
             self.leaf_spawner.append(pygame.Rect(4 + tree['pos'][0], 4 + tree['pos'][1], 23, 13)) # lisab lehe_spawner listi puu Recti
 
         # tegelaste ja playeri spawnerite tekitamine tekitamine
-        
         self.tegelased = []
         for spawner in self.tilemap.extract([('spawners', 0), ('spawners', 1), ('spawners', 2)]):
             if spawner['variant'] == 0:
@@ -68,7 +69,8 @@ class Game:
         
 
         self.particles = []
-
+        self.aare1 = [Particle(self, 'aare_1', (760, 279), velocity=[0, -0.08], frame=0)] #aarete asukohad
+        self.aare2 = [Particle(self, 'aare_2', (-700, -665), velocity=[0, -0.08], frame=0)]
         # scroll variable et liigutada ekraani
         self.scroll = [0, 0]
 
@@ -76,7 +78,8 @@ class Game:
         while True:
             #tausta värvus
             self.display.blit(self.assets['background'], (0, 0))
-
+            aare_1_leitud = 1
+            aare_2_leitud = 1
             # kaamera liigutamine tegelase ligidal
             self.scroll[0] += (self.player.rect().centerx - self.display.get_width() / 2 - self.scroll[0]) / 30
             self.scroll[1] += (self.player.rect().centery - self.display.get_height() / 2 - self.scroll[1]) / 30
@@ -87,7 +90,7 @@ class Game:
                 if random.random() * 49999 < rect.width *rect.height: # random.random() on suvaline arv 0 kuni 1, kontrollime kas see on väiksem kui meie piksel ruut alas # suure numbriga korrutamisel saame kindlad olla et lehti ei teki iga frame lõpmatuseni
                     pos = (rect.x + random.random() * rect.width, rect.y + random.random() * rect.height)
                     self.particles.append(Particle(self, 'leaf', pos, velocity=[-0.1, 0.3], frame=random.randint(0, 20))) # osakeste tekitamine toimub siin
-            
+
             self.tilemap.render(self.display, offset=render_scroll)
             
             for tegelane in self.tegelased.copy():
@@ -109,6 +112,36 @@ class Game:
                 if kill:
                     self.particles.remove(particle)
 
+            
+                
+            # karu ja konna aarde asukohad
+            #karu aare
+            if 730 <= self.player.pos[0] <= 780 and 280 <= self.player.pos[1] <= 290:
+                if self.player.dig_time > 0:
+                    aare_1_leitud -= 1
+
+            #konna aare
+            if -730 <= self.player.pos[0] <= -670 and -660 <= self.player.pos[1] <= -650:
+                if self.player.dig_time > 0:
+                    aare_2_leitud -= 1
+
+            #karu aarde leidmine
+            if aare_1_leitud == 0:        
+                for aare in self.aare1:
+                    kill = aare.update()
+                    aare.render(self.display, offset=render_scroll)
+                    if kill:
+                        self.aare1.remove(aare)
+
+            #konna aarde leimine
+            if aare_2_leitud == 0:
+                for aare in self.aare2:
+                    kill = aare.update()
+                    aare.render(self.display, offset=render_scroll)
+                    if kill:
+                        self.aare2.remove(aare)    
+            
+            #if 740 <= self.player.pos[0] <= 770 and 280 <= self.player.pos[1] <= 295:
             # EVENTS
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
