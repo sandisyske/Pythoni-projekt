@@ -102,6 +102,7 @@ class Player(PhysicsEntity):
         self.jumps = 2 #mitu hüpet saab teha õhus
         self.wall_slide = False
         self.dig_time = 0
+        self.digging = True
 
     def update(self, tilemap, movement=(0, 0)):
         super().update(tilemap, movement=movement)
@@ -110,7 +111,6 @@ class Player(PhysicsEntity):
         self.air_time += 1
         if self.collisions['down']:
             self.air_time = 0
-            self.digging = False
             self.jumps = 2 #peale igat põranda puudutust saab 2x hüpata
         
             

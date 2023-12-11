@@ -36,6 +36,7 @@ class Game:
             'player/dig': Animation(load_images('entities/player/dig'), img_dur=12, loop=False),
             'player/wall_slide': Animation(load_images('entities/player/wall_slide')),
             'particle/leaf': Animation(load_images('particles/leaf'), img_dur=20, loop=False),
+            #siia lisada aare particle lisana aare_1 ja aare_2
             #            'tegelane_konn/idle': Animation(load_images('entities/tegelane/konn/idle')),
             
         }
@@ -49,12 +50,12 @@ class Game:
         self.tilemap = Tilemap(self, tile_size=16)
         self.tilemap.load('map.json')
 
-        #osakeste tekitamine
+        #lehtede tekitamine
         self.leaf_spawner = []
         for tree in self.tilemap.extract([('large_decor', 5)], keep=True):
             self.leaf_spawner.append(pygame.Rect(4 + tree['pos'][0], 4 + tree['pos'][1], 23, 13)) # lisab lehe_spawner listi puu Recti
 
-        # spawnerite tekitamine
+        # tegelaste ja playeri spawnerite tekitamine tekitamine
         
         self.tegelased = []
         for spawner in self.tilemap.extract([('spawners', 0), ('spawners', 1), ('spawners', 2)]):
