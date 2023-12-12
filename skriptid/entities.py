@@ -84,14 +84,12 @@ class Karu(PhysicsEntity):
         super().__init__(game, 'karu', pos, size)
         self.alert_flag = alert_flag
         
-    def update(self, tilemap, movement=(0, 0)):
+    def update(self, tilemap, movement=(0, 0)): #TÖÖTAB!
         super().update(tilemap, movement=movement)
-        if self.alert(self.game.player.pos) == True: # MIS MUUTUJAT SIIA PANNA???
-            print('talk')
-            self.set_action('talk')
+        if self.alert(self.game.player.pos) == True:
+            self.set_action('wave')
         else:
             self.set_action('idle')
-        # seda ei ole veel t66le saanud
 
 
     def alert(self, player_pos):
