@@ -1,6 +1,5 @@
-# Characters
+
 import pygame
-import time
 
 class PhysicsEntity:
     def __init__(self, game, e_type, pos, size):
@@ -81,11 +80,30 @@ class PhysicsEntity:
 # tegelased
 
 class Karu(PhysicsEntity):
-    def __init__(self, game, pos, size):
+    def __init__(self, game, pos, size, alert_flag):
         super().__init__(game, 'karu', pos, size)
-
+        self.alert_flag = alert_flag
+        
     def update(self, tilemap, movement=(0, 0)):
         super().update(tilemap, movement=movement)
+        if self.alert(self.game.player.pos) == True: # MIS MUUTUJAT SIIA PANNA???
+            print('talk')
+            self.set_action('talk')
+        else:
+            self.set_action('idle')
+        # seda ei ole veel t66le saanud
+
+
+    def alert(self, player_pos):
+        self.player_pos = player_pos
+        if 450 < player_pos[0] < 550 and -64 < player_pos[1] < -62:
+            self.alert_flag = True
+        else:
+            self.alert_flag = False
+        return self.alert_flag
+            
+
+        
 
 class Konn(PhysicsEntity):
     def __init__(self, game, pos, size):
@@ -126,7 +144,6 @@ class Player(PhysicsEntity):
             self.set_action('wall_slide')
 
             
-
         if not self.wall_slide:
             if self.air_time > 4:
                 self.set_action('jump')
@@ -137,6 +154,7 @@ class Player(PhysicsEntity):
             else:
                 self.set_action('idle')
         
+
         if self.velocity[0] > 0: # liigub vasakule
             self.velocity[0] = max(self.velocity[0] - 0.1, 0)
         else:                    # liigub paremale
@@ -145,13 +163,13 @@ class Player(PhysicsEntity):
     def jump(self):
         if self.wall_slide:
             if self.flip and self.last_movement[0] < 0:
-                self.velocity[0] = 3.5 #impulls, pressib sind paremale poole seinast eemale
+                self.velocity[0] = 3 #impulls, pressib sind paremale poole seinast eemale
                 self.velocity[1] = -2.5
                 self.air_time = 5
                 self.jumps = max(0, self.jumps - 1) #et miinimum väärtus oleks null
                 return True
             elif not self.flip and self.last_movement[0] > 0:
-                self.velocity[0] = -3.5
+                self.velocity[0] = -3
                 self.velocity[1] = -2.5
                 self.air_time = 4
                 self.jumps = max(0, self.jumps - 1)
@@ -163,4 +181,11 @@ class Player(PhysicsEntity):
     
     def dig(self):
         self.dig_time = 150
+
+
+    def talk(self, NPC_close=False):
+        if NPC_close:
+            print('talk')
+        else:
+            print(NPC_close)
 
