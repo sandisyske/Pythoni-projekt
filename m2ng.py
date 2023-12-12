@@ -7,7 +7,49 @@ from skriptid.utils import load_image, load_images, Animation
 from skriptid.entities import PhysicsEntity, Player, Karu, Konn
 from skriptid.tilemap import Tilemap
 from skriptid.particles import Particle
+#from skriptid.dialoog import Font
 
+# Funcs/Classes ---------------------------------------------- #
+def clip(surf, x, y, x_size, y_size):
+   handle_surf = surf.copy()
+   clipR = pygame.Rect(x, y, x_size, y_size)
+   handle_surf.set_clip(clipR)
+   image = surf.subsurface(handle_surf.get_clip())
+   return image.copy()
+class Font():
+    def __init__(self, path):
+        self.spacing = 1
+        self.character_order = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','.','-',',',':','+','\'','!','?','0','1','2','3','4','5','6','7','8','9','(',')','/','_','=','\\','[',']','*','"','<','>',';']
+        font_img = pygame.image.load(path).convert()
+        font_img.set_colorkey((0, 0, 0))
+        current_char_width = 0
+        self.characters = {}
+        character_count = 0
+        for x in range(font_img.get_width()):
+            c = font_img.get_at((x, 0))
+            if c[0] == 127:
+                char_img = clip(font_img, x - current_char_width, 0, current_char_width, font_img.get_height())
+                self.characters[self.character_order[character_count]] = char_img.copy()
+                character_count += 1
+                current_char_width = 0
+            else:
+                current_char_width += 1
+        self.space_width = self.characters['A'].get_width()   
+
+    def render(self, surf, text, loc):
+        x_offset = 0
+        for char in text:
+            if char != ' ':
+                surf.blit(self.characters[char], (loc[0] + x_offset, loc[1]))
+                x_offset += self.characters[char].get_width() + self.spacing
+            else:
+                x_offset += self.space_width + self.spacing
+
+
+
+
+
+# klass GAME ----------------------------------------------------------------------------------->
 class Game:
     def __init__(self):
         pygame.init()
@@ -20,6 +62,8 @@ class Game:
         
         self.movement = [False, False]
         self.alert_flag = False
+
+        
         # ANIMATSIOONID -------------------------------------------------------------------------->
         self.assets = {
             'decor': load_images('tiles/decor'),
@@ -29,6 +73,7 @@ class Game:
             'player': load_image('entities/player.png'),
             'spawners': load_images('tiles/spawners'),
             'background': load_image('background.png'),
+            'text_box': load_image('text_box.png'),
             'karu/idle': Animation(load_images('entities/tegelane/karu/idle'), img_dur=12),
             'karu/talk': Animation(load_images('entities/tegelane/karu/talk'), img_dur=12),
             'karu/wave': Animation(load_images('entities/tegelane/karu/wave'), img_dur=12),
@@ -83,18 +128,21 @@ class Game:
         # scroll variable et liigutada ekraani
         self.scroll = [0, 0]
 
-    # M2NGU LOOP ---------------------------------------------------------------------------------------------->
+
+
+    # M2NGU ENDA LOOP ---------------------------------------------------------------------------------------------->
     def run(self):
         while True:
 
             #TAUST -------------------------------------------------------------------------------------------->
             self.display.blit(self.assets['background'], (0, 0))
+            
 
             # MUUTUJAD ---------------------------------------------------------------------------------------->
             aare_1_leitud = 1
             aare_2_leitud = 1
-            show_button = False
-            karu_talk = False
+            my_font = Font('data/images/small_font.png')
+            # alert on True, kui player on tegelase lähedal
             self.alert_flag = self.karu.alert(self.player.pos)
 
             # kaamera liigutamine tegelase ligidal ----------------------------------------------------------->
@@ -163,15 +211,18 @@ class Game:
                     if kill:
                         self.aare2.remove(aare)    
             
-            #print(alert)
-            # karu alert 2kki teisest kohast?
-            #print(self.alert_flag)
-            self.alert_flag = self.karu.alert(self.player.pos) # kui player on karu juures, siis on True
-                
-                #self.karu.talk()
-                
             
-
+        
+            #print(self.alert_flag)
+             # kui player on karu juures, siis on True
+                
+                
+                
+            if self.alert_flag:
+                self.display.blit(self.assets['text_box'], (0, 0))
+                my_font.render(self.display, 'Palun aita leida minu kadunud saabas!', (25, 205))
+            
+            
             
             
 
@@ -191,8 +242,9 @@ class Game:
                     if event.key == pygame.K_DOWN:
                         self.player.dig()
                     if event.key == pygame.K_z:
-                        #self.player.talk() - vaja veel kirjutada funktsioon
-                        print(self.player.pos)
+                        self.player.talk(self.alert_flag)# vaja veel kirjutada funktsioon
+                        
+                        
                     if event.key == pygame.K_ESCAPE:
                         print("Mäng on sulgunud!")
                         pygame.quit()
@@ -206,7 +258,9 @@ class Game:
 
             # EKRAANILE KUVAMINE JA UUENDAMINE ---------------------------------------------------------------->
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0)) #erkaan ekraani sees ja scaleimine
+            
             pygame.display.update()
             self.clock.tick(60)  #FPS
+
 
 Game().run()

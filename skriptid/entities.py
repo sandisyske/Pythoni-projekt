@@ -181,9 +181,8 @@ class Player(PhysicsEntity):
         self.dig_time = 150
 
 
-    def talk(self, NPC_close=False):
-        if NPC_close:
-            print('talk')
-        else:
-            print(NPC_close)
+    def talk(self, alert_flag):
+        if alert_flag:
+            pass
+
 
