@@ -132,6 +132,7 @@ class Game:
 
     # M2NGU ENDA LOOP ---------------------------------------------------------------------------------------------->
     def run(self):
+    
         while True:
 
             #TAUST -------------------------------------------------------------------------------------------->
@@ -142,6 +143,7 @@ class Game:
             aare_1_leitud = 1
             aare_2_leitud = 1
             my_font = Font('data/images/small_font.png')
+            bear_talk = False
             # alert on True, kui player on tegelase lähedal
             self.alert_flag = self.karu.alert(self.player.pos)
 
@@ -216,11 +218,16 @@ class Game:
             #print(self.alert_flag)
              # kui player on karu juures, siis on True
                 
-                
-                
-            if self.alert_flag:
+               
+            # see asi ei tyaha veel töötada kui aarde leiad
+            if self.alert_flag and aare_1_leitud < 1:
                 self.display.blit(self.assets['text_box'], (0, 0))
-                my_font.render(self.display, 'Palun aita leida minu kadunud saabas!', (25, 205))
+                my_font.render(self.display, 'Minu kadunud saabas!', (25, 205))
+            elif self.alert_flag and not aare_1_leitud < 1:
+                self.display.blit(self.assets['text_box'], (0, 0))
+                my_font.render(self.display, 'Palun aita leida minu kadunud saabas! See kadus idapoolses koopas, ', (25, 205))
+                my_font.render(self.display, 'kus ma otsisin head kohta magamiseks.', (25, 215))
+                
             
             
             
@@ -243,6 +250,7 @@ class Game:
                         self.player.dig()
                     if event.key == pygame.K_z:
                         self.player.talk(self.alert_flag)# vaja veel kirjutada funktsioon
+                        
                         
                         
                     if event.key == pygame.K_ESCAPE:
