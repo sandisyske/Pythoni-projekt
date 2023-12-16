@@ -62,6 +62,7 @@ class Game:
         
         self.movement = [False, False]
         self.alert_flag = False
+        self.alert_flag_konn = False
 
         
         # ANIMATSIOONID -------------------------------------------------------------------------->
@@ -78,9 +79,10 @@ class Game:
             'karu/talk': Animation(load_images('entities/tegelane/karu/talk'), img_dur=12),
             'karu/wave': Animation(load_images('entities/tegelane/karu/wave'), img_dur=12),
             'karu/happy': Animation(load_images('entities/tegelane/karu/happy'), img_dur=12),
-            'konn/idle': Animation(load_images('entities/tegelane/konn/idle')),
-            #'konn/talk': Animation(load_images('entities/tegelane/konn/idle')),
-            #'konn/happy': Animation(load_images('entities/tegelane/konn/idle')),
+            'konn/idle': Animation(load_images('entities/tegelane/konn/idle'), img_dur=12),
+            'konn/wave': Animation(load_images('entities/tegelane/konn/wave'), img_dur=12),
+            'konn/talk': Animation(load_images('entities/tegelane/konn/talk'), img_dur=12),
+            'konn/happy': Animation(load_images('entities/tegelane/konn/happy'), img_dur=12),
             'player/idle': Animation(load_images('entities/player/idle'), img_dur=6),
             'player/run': Animation(load_images('entities/player/run'), img_dur=6),
             'player/jump': Animation(load_images('entities/player/jump'), img_dur=9, loop=False),
@@ -97,6 +99,7 @@ class Game:
         # MÄNGU TEGELASED ------------------------------------------------------------------------------------->
         self.player = Player(self, (50, 50), (8, 15))
         self.karu = Karu(self, (145, -63), (8, 15), self.alert_flag)
+        self.konn = Konn(self, (50, 50), (8, 15), self.alert_flag_konn)
         
         
         # MAP ------------------------------------------------------------------------------------------------->
@@ -115,7 +118,7 @@ class Game:
             if spawner['variant'] == 0:
                 self.player.pos = spawner['pos']
             elif spawner['variant'] == 1:
-                self.tegelased.append(Konn(self, spawner['pos'], (8, 15)))
+                self.tegelased.append(Konn(self, spawner['pos'], (8, 15), self.alert_flag_konn))
             else:
                 self.tegelased.append(Karu(self, spawner['pos'], (8, 15), self.alert_flag))
         
@@ -146,6 +149,7 @@ class Game:
             bear_talk = False
             # alert on True, kui player on tegelase lähedal
             self.alert_flag = self.karu.alert(self.player.pos)
+            self.alert_flag_konn = self.konn.alert(self.player.pos)
 
             # kaamera liigutamine tegelase ligidal ----------------------------------------------------------->
             self.scroll[0] += (self.player.rect().centerx - self.display.get_width() / 2 - self.scroll[0]) / 30
@@ -212,7 +216,6 @@ class Game:
                     aare.render(self.display, offset=render_scroll)
                     if kill:
                         self.aare2.remove(aare)    
-            
             
         
             #print(self.alert_flag)

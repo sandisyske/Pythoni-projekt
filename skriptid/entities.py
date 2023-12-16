@@ -104,11 +104,26 @@ class Karu(PhysicsEntity):
         
 
 class Konn(PhysicsEntity):
-    def __init__(self, game, pos, size):
+    def __init__(self, game, pos, size, alert_flag_konn):
         super().__init__(game, 'konn', pos, size)
-
-    def update(self, tilemap, movement=(0, 0)):
+        self.alert_flag_konn = alert_flag_konn
+        
+    def update(self, tilemap, movement=(0, 0)): #EI TÖÖTA!
         super().update(tilemap, movement=movement)
+        #print(self.alert_flag_konn)
+        if self.alert(self.game.player.pos) == True:
+            self.set_action('wave')
+        else:
+            self.set_action('idle')
+
+
+    def alert(self, player_pos):
+        self.player_pos = player_pos
+        if -460 < player_pos[0] < -395 and 160 < player_pos[1] < 170:
+            self.alert_flag_konn = True
+        else:
+            self.alert_flag_konn = False
+        return self.alert_flag_konn
     
 # player
 class Player(PhysicsEntity):
