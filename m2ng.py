@@ -59,6 +59,7 @@ class Game:
         self.display = pygame.Surface((320, 240))
 
         self.clock = pygame.time.Clock()
+
         
         self.movement = [False, False]
         self.alert_flag = False
@@ -109,10 +110,26 @@ class Game:
         self.konn = Konn(self, (50, 50), (8, 15), self.alert_flag_konn)
         
         
+
         
         # MAP ------------------------------------------------------------------------------------------------->
         self.tilemap = Tilemap(self, tile_size=16)
-        self.tilemap.load('map.json')
+        #self.tilemap.load('map.json')
+        self.load_level(0)
+        
+
+        # OSAKESED -------------------------------------------------------------------------------------------->
+        self.particles = []
+        self.aare1 = [Particle(self, 'aare_1', (760, 279), velocity=[0, -0.08], frame=0)] #aarete asukohad
+        self.aare2 = [Particle(self, 'aare_2', (-700, -665), velocity=[0, -0.08], frame=0)]
+        # nupud 
+        self.nupp_karu = [Particle(self, 'button', (500, -80), velocity=[0, 0], frame=0)] # talk button for clickbait
+        self.nupp_konn = [Particle(self, 'button', (-412, 145), velocity=[0, 0], frame=0)]
+        self.nupp_post = [Particle(self, 'button', (120, 45), velocity=[0, 0], frame=0)]
+
+        
+    def load_level(self, level): # mapi laadimine
+        self.tilemap.load('data/maps/' + str(level) + '.json')
 
         #SPAWNERID -------------------------------------------------------------------------------------------->
         #lehtede tekitamine
@@ -129,19 +146,12 @@ class Game:
                 self.tegelased.append(Konn(self, spawner['pos'], (8, 15), self.alert_flag_konn))
             else:
                 self.tegelased.append(Karu(self, spawner['pos'], (8, 15), self.alert_flag))
+
+        self.kutu = 0
         
-
-        self.particles = []
-        self.aare1 = [Particle(self, 'aare_1', (760, 279), velocity=[0, -0.08], frame=0)] #aarete asukohad
-        self.aare2 = [Particle(self, 'aare_2', (-700, -665), velocity=[0, -0.08], frame=0)]
-        # nupud 
-        self.nupp_karu = [Particle(self, 'button', (500, -80), velocity=[0, 0], frame=0)] # talk button for clickbait
-        self.nupp_konn = [Particle(self, 'button', (-412, 145), velocity=[0, 0], frame=0)]
-        self.nupp_post = [Particle(self, 'button', (120, 45), velocity=[0, 0], frame=0)]
-
         # scroll variable et liigutada ekraani
         self.scroll = [0, 0]
-
+        self.ekraani_vahetus = -30
 
     # M2NGU ENDA LOOP ---------------------------------------------------------------------------------------------->
     def run(self):
@@ -150,19 +160,35 @@ class Game:
         aare_1_leitud = 1
         aare_2_leitud = 1
         post_aktiivne = False
+        
         while True:
 
             #TAUST -------------------------------------------------------------------------------------------->
             self.display.blit(self.assets['background'], (0, 0))
             
+            # ANIMATSIOON M2NGU ja suremine
 
+            if self.happy_konn and self.happy_karu:
+                self.ekraani_vahetus += 1
+                if self.ekraani_vahetus > 30:
+                    self.load_level(0)
+            if self.ekraani_vahetus < 0:
+                self.ekraani_vahetus += 1
+            
+
+            if self.player.pos[1] > 500:
+                self.kutu += 1
+                if self.kutu >= 10:
+                    self.ekraani_vahetus = min(30, self.ekraani_vahetus + 1)
+                if self.kutu > 40:
+                    self.load_level(0)
             # MUUTUJAD ---------------------------------------------------------------------------------------->
-            
             my_font = Font('data/images/small_font.png')
-            
+
             # alert on True, kui player on tegelase lähedal
             self.alert_flag = self.karu.alert(self.player.pos)
             self.alert_flag_konn = self.konn.alert(self.player.pos)
+
 
             # kaamera liigutamine tegelase ligidal ----------------------------------------------------------->
             self.scroll[0] += (self.player.rect().centerx - self.display.get_width() / 2 - self.scroll[0]) / 30
@@ -320,6 +346,11 @@ class Game:
                         self.movement[0] = False       
 
             # EKRAANILE KUVAMINE JA UUENDAMINE ---------------------------------------------------------------->
+            if self.ekraani_vahetus:
+                vahetus_surf = pygame.Surface(self.display.get_size())
+                pygame.draw.circle(vahetus_surf, (255, 255, 255), (self.display.get_width() // 2, self.display.get_height() //2), (30 - abs(self.ekraani_vahetus)) * 8)
+                vahetus_surf.set_colorkey((255, 255, 255))
+                self.display.blit(vahetus_surf, (0, 0))
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0)) #erkaan ekraani sees ja scaleimine
             
             pygame.display.update()
