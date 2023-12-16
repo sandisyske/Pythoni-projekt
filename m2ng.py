@@ -71,7 +71,7 @@ class Game:
         self.happy_karu = False
         self.happy_konn = False
 
-
+        click = False
         
         # ANIMATSIOONID -------------------------------------------------------------------------->
         self.assets = {
@@ -82,6 +82,7 @@ class Game:
             'player': load_image('entities/player.png'),
             'spawners': load_images('tiles/spawners'),
             'background': load_image('background.png'),
+            'menu': load_image('menu.png'),
             'text_box': load_image('text_box.png'),
             'karu/idle': Animation(load_images('entities/tegelane/karu/idle'), img_dur=12),
             'karu/talk': Animation(load_images('entities/tegelane/karu/talk'), img_dur=12),
@@ -127,7 +128,46 @@ class Game:
         self.nupp_konn = [Particle(self, 'button', (-412, 145), velocity=[0, 0], frame=0)]
         self.nupp_post = [Particle(self, 'button', (120, 45), velocity=[0, 0], frame=0)]
 
-        
+    # MENÜÜ LOOP
+    def main_menu(self):
+        while True:
+            self.screen.fill((0, 0, 0))
+            self.screen.blit(self.assets['menu'], (0, 0))
+
+            mx, my = pygame.mouse.get_pos()
+            nupp_1 = pygame.Rect(160, 256, 320, 64)
+            nupp_2 = pygame.Rect(224, 384, 192, 64)
+
+            if nupp_1.collidepoint((mx, my)):
+                if click:
+                    self.run()
+            if nupp_2.collidepoint((mx, my)):
+                if click:
+                    pygame.quit()
+                    sys.exit()
+
+
+
+            click = False
+            for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit() 
+                        sys.exit()
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_ESCAPE:
+                            print("Mäng on sulgunud!")
+                            pygame.quit() 
+                            sys.exit()
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 1:
+                            click = True
+
+
+
+
+            pygame.display.update()
+            self.clock.tick(60)
+
     def load_level(self, level): # mapi laadimine
         self.tilemap.load('data/maps/' + str(level) + '.json')
 
@@ -152,16 +192,17 @@ class Game:
         # scroll variable et liigutada ekraani
         self.scroll = [0, 0]
         self.ekraani_vahetus = -30
-
+        click = False
+    
     # M2NGU ENDA LOOP ---------------------------------------------------------------------------------------------->
     def run(self):
-
+        run = True
         #self.talk = False
         aare_1_leitud = 1
         aare_2_leitud = 1
         post_aktiivne = False
         
-        while True:
+        while run:
 
             #TAUST -------------------------------------------------------------------------------------------->
             self.display.blit(self.assets['background'], (0, 0))
@@ -335,9 +376,7 @@ class Game:
                         
                         
                     if event.key == pygame.K_ESCAPE:
-                        print("Mäng on sulgunud!")
-                        pygame.quit()
-                        sys.exit()
+                        run = False
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_RIGHT:
@@ -357,4 +396,4 @@ class Game:
             self.clock.tick(60)  #FPS
 
 
-Game().run()
+Game().main_menu() #run
