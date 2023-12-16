@@ -86,8 +86,12 @@ class Karu(PhysicsEntity):
         
     def update(self, tilemap, movement=(0, 0)): #TÖÖTAB!
         super().update(tilemap, movement=movement)
-        if self.alert(self.game.player.pos) == True:
+        if self.game.happy_karu == True:
+                self.set_action('happy')
+        elif self.alert(self.game.player.pos) and not self.game.talk_karu:
             self.set_action('wave')
+        elif self.game.talk_karu == True:
+                self.set_action('talk')   
         else:
             self.set_action('idle')
 
@@ -108,11 +112,14 @@ class Konn(PhysicsEntity):
         super().__init__(game, 'konn', pos, size)
         self.alert_flag_konn = alert_flag_konn
         
-    def update(self, tilemap, movement=(0, 0)): #EI TÖÖTA!
+    def update(self, tilemap, movement=(0, 0)): #TÖÖTAB!
         super().update(tilemap, movement=movement)
-        #print(self.alert_flag_konn)
-        if self.alert(self.game.player.pos) == True:
+        if self.game.happy_konn == True:
+                self.set_action('happy')
+        elif self.alert(self.game.player.pos) and not self.game.talk_konn:
             self.set_action('wave')
+        elif self.game.talk_konn == True:
+                self.set_action('talk')   
         else:
             self.set_action('idle')
 
@@ -196,8 +203,13 @@ class Player(PhysicsEntity):
         self.dig_time = 150
 
 
-    def talk(self, alert_flag):
-        if alert_flag:
-            pass
+    def talk(self, flag_karu, flag_konn, aare_1, aare_2):
+        if flag_karu == True:
+            if aare_1 < 1:
+                return True
+        elif flag_konn == True:
+            if aare_2 < 1:
+                return True
+
 
 

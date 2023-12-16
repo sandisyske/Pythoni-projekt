@@ -63,6 +63,13 @@ class Game:
         self.movement = [False, False]
         self.alert_flag = False
         self.alert_flag_konn = False
+        self.post = False
+
+        self.talk_karu = False
+        self.talk_konn = False
+        self.happy_karu = False
+        self.happy_konn = False
+
 
         
         # ANIMATSIOONID -------------------------------------------------------------------------->
@@ -81,8 +88,8 @@ class Game:
             'karu/happy': Animation(load_images('entities/tegelane/karu/happy'), img_dur=12),
             'konn/idle': Animation(load_images('entities/tegelane/konn/idle'), img_dur=12),
             'konn/wave': Animation(load_images('entities/tegelane/konn/wave'), img_dur=12),
-            'konn/talk': Animation(load_images('entities/tegelane/konn/talk'), img_dur=12),
-            'konn/happy': Animation(load_images('entities/tegelane/konn/happy'), img_dur=12),
+            'konn/talk': Animation(load_images('entities/tegelane/konn/talk'), img_dur=15),
+            'konn/happy': Animation(load_images('entities/tegelane/konn/happy'), img_dur=18),
             'player/idle': Animation(load_images('entities/player/idle'), img_dur=6),
             'player/run': Animation(load_images('entities/player/run'), img_dur=6),
             'player/jump': Animation(load_images('entities/player/jump'), img_dur=9, loop=False),
@@ -91,7 +98,7 @@ class Game:
             'particle/leaf': Animation(load_images('particles/leaf'), img_dur=20, loop=False),
             'particle/aare_1': Animation(load_images('particles/aare_1'), img_dur=14, loop=False),
             'particle/aare_2': Animation(load_images('particles/aare_2'), img_dur=14, loop=False),
-            'particle/button': Animation(load_images('particles/button'), img_dur=10),
+            'particle/button': Animation(load_images('particles/button'), img_dur=20),
             #siia lisada aare particle lisana aare_1 ja aare_2
             #            'tegelane_konn/idle': Animation(load_images('entities/tegelane/konn/idle')),
             
@@ -100,6 +107,7 @@ class Game:
         self.player = Player(self, (50, 50), (8, 15))
         self.karu = Karu(self, (145, -63), (8, 15), self.alert_flag)
         self.konn = Konn(self, (50, 50), (8, 15), self.alert_flag_konn)
+        
         
         
         # MAP ------------------------------------------------------------------------------------------------->
@@ -126,16 +134,22 @@ class Game:
         self.particles = []
         self.aare1 = [Particle(self, 'aare_1', (760, 279), velocity=[0, -0.08], frame=0)] #aarete asukohad
         self.aare2 = [Particle(self, 'aare_2', (-700, -665), velocity=[0, -0.08], frame=0)]
-        self.button = [Particle(self, 'button', (self.player.pos[0], self.player.pos[1] - 30), velocity=[0, 0], frame=0)] # talk button for clickbait
+        # nupud 
+        self.nupp_karu = [Particle(self, 'button', (500, -80), velocity=[0, 0], frame=0)] # talk button for clickbait
+        self.nupp_konn = [Particle(self, 'button', (-412, 145), velocity=[0, 0], frame=0)]
+        self.nupp_post = [Particle(self, 'button', (120, 45), velocity=[0, 0], frame=0)]
 
         # scroll variable et liigutada ekraani
         self.scroll = [0, 0]
 
 
-
     # M2NGU ENDA LOOP ---------------------------------------------------------------------------------------------->
     def run(self):
-    
+
+        #self.talk = False
+        aare_1_leitud = 1
+        aare_2_leitud = 1
+        post_aktiivne = False
         while True:
 
             #TAUST -------------------------------------------------------------------------------------------->
@@ -143,10 +157,9 @@ class Game:
             
 
             # MUUTUJAD ---------------------------------------------------------------------------------------->
-            aare_1_leitud = 1
-            aare_2_leitud = 1
+            
             my_font = Font('data/images/small_font.png')
-            bear_talk = False
+            
             # alert on True, kui player on tegelase lähedal
             self.alert_flag = self.karu.alert(self.player.pos)
             self.alert_flag_konn = self.konn.alert(self.player.pos)
@@ -194,47 +207,83 @@ class Game:
             #karu aare
             if 730 <= self.player.pos[0] <= 780 and 280 <= self.player.pos[1] <= 290:
                 if self.player.dig_time > 0:
-                    aare_1_leitud -= 1
+                    aare_1_leitud = 0
 
             #konna aare
             if -730 <= self.player.pos[0] <= -670 and -660 <= self.player.pos[1] <= -650:
                 if self.player.dig_time > 0:
-                    aare_2_leitud -= 1
+                    aare_2_leitud = 0
 
             #karu aarde leidmine
-            if aare_1_leitud == 0:        
+            if aare_1_leitud < 1:        
                 for aare in self.aare1:
                     kill = aare.update()
                     aare.render(self.display, offset=render_scroll)
                     if kill:
                         self.aare1.remove(aare)
 
-            #konna aarde leimine
-            if aare_2_leitud == 0:
+            #konna aarde leidmine
+            if aare_2_leitud < 1:
                 for aare in self.aare2:
                     kill = aare.update()
                     aare.render(self.display, offset=render_scroll)
                     if kill:
                         self.aare2.remove(aare)    
-            
-        
-            #print(self.alert_flag)
-             # kui player on karu juures, siis on True
-                
-               
-            # see asi ei tyaha veel töötada kui aarde leiad
-            if self.alert_flag and aare_1_leitud < 1:
-                self.display.blit(self.assets['text_box'], (0, 0))
-                my_font.render(self.display, 'Minu kadunud saabas!', (25, 205))
-            elif self.alert_flag and not aare_1_leitud < 1:
-                self.display.blit(self.assets['text_box'], (0, 0))
-                my_font.render(self.display, 'Palun aita leida minu kadunud saabas! See kadus idapoolses koopas, ', (25, 205))
-                my_font.render(self.display, 'kus ma otsisin head kohta magamiseks.', (25, 215))
-                
-            
-            
-            
-            
+
+            # post juhatuseks ---------------------------------------------------------------------------------->
+
+            if 105 <= self.player.pos[0] <= 125 and 64 <= self.player.pos[1] <= 66:
+                if not post_aktiivne:
+                    for post in self.nupp_post:
+                        post.update()
+                        post.render(self.display, offset=render_scroll)
+                else:
+                    self.display.blit(self.assets['text_box'], (0, 0))
+                    my_font.render(self.display, '                            Karu maja  -->', (25, 205))
+                    my_font.render(self.display, '                        <-- Konna maja ', (25, 215))
+            else:
+                post_aktiivne = False
+                    
+
+
+            # karu ja konna ylesanded ------------------------------------------------------------------------->
+       
+            # karu ylesanne
+            if self.alert_flag: # on True kui player on karu juures
+                if not self.talk_karu:
+                    for nupp in self.nupp_karu:
+                        nupp.update()
+                        nupp.render(self.display, offset=render_scroll)
+                else:
+                    if aare_1_leitud < 1: # kuidas nyyd muuta animatsiooni
+                        self.happy_karu = True
+                        self.display.blit(self.assets['text_box'], (0, 0))
+                        my_font.render(self.display, 'Sa leidsid minu kadunud saapa!', (25, 205))
+                    elif aare_1_leitud == 1:
+                        self.display.blit(self.assets['text_box'], (0, 0))
+                        my_font.render(self.display, 'Palun aita leida minu kadunud saabas! See kadus idapoolses koopas, ', (25, 205))
+                        my_font.render(self.display, 'kus ma otsisin head kohta magamiseks.', (25, 215))
+            else:
+                self.talk_karu = False
+                #self.happy_karu = False kui tahame et ta j2tkaks enda idle animatsiooni siis saab selle tagasi panna              
+                    
+            # konna ylesanne
+            if self.alert_flag_konn: # on True kui player on karu juures
+                if not self.talk_konn:
+                    for nupp in self.nupp_konn:
+                        nupp.update()
+                        nupp.render(self.display, offset=render_scroll)
+                else:
+                    if aare_2_leitud < 1: # kuidas nyyd muuta animatsiooni
+                        self.happy_konn = True
+                        self.display.blit(self.assets['text_box'], (0, 0))
+                        my_font.render(self.display, 'Minu vanaema kaelakee! mmmm aitah', (25, 205))
+                    elif aare_2_leitud == 1:
+                        self.display.blit(self.assets['text_box'], (0, 0))
+                        my_font.render(self.display, 'Kuidas see juhtus! Ma ronisin ja ronisin ... krooksusin suure kivi juures', (25, 205))
+                        my_font.render(self.display, 'kuid tagasi tulles avastasin, et kaotasin vanaema kaelakee', (25, 215))
+            else:
+                self.talk_konn = False    
 
 
             #  KEY EVENTS ------------------------------------------------------------------------------------>
@@ -251,9 +300,12 @@ class Game:
                         self.player.jump()
                     if event.key == pygame.K_DOWN:
                         self.player.dig()
-                    if event.key == pygame.K_z:
-                        self.player.talk(self.alert_flag)# vaja veel kirjutada funktsioon
-                        
+                    if event.key == pygame.K_a:
+                        self.talk_karu = True
+                        self.talk_konn = True
+                        post_aktiivne = True
+                    if event.key == pygame.K_z: # ajutine, ei j22 m2ngu sisse
+                        print(self.player.pos)    
                         
                         
                     if event.key == pygame.K_ESCAPE:
