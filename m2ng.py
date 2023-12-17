@@ -135,8 +135,8 @@ class Game:
             self.screen.blit(self.assets['menu'], (0, 0))
 
             mx, my = pygame.mouse.get_pos()
-            nupp_1 = pygame.Rect(160, 256, 320, 64)
-            nupp_2 = pygame.Rect(224, 384, 192, 64)
+            nupp_1 = pygame.Rect(224, 248, 192, 64)
+            nupp_2 = pygame.Rect(224, 346, 192, 64)
 
             if nupp_1.collidepoint((mx, my)):
                 if click:
