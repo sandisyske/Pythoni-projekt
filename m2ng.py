@@ -7,9 +7,9 @@ from skriptid.utils import load_image, load_images, Animation
 from skriptid.entities import PhysicsEntity, Player, Karu, Konn
 from skriptid.tilemap import Tilemap
 from skriptid.particles import Particle
-#from skriptid.dialoog import Font
 
-# Funcs/Classes ---------------------------------------------- #
+
+# Sõnastik tähtedele -------------------------------------------------------------------------------->
 def clip(surf, x, y, x_size, y_size):
    handle_surf = surf.copy()
    clipR = pygame.Rect(x, y, x_size, y_size)
@@ -46,10 +46,7 @@ class Font():
                 x_offset += self.space_width + self.spacing
 
 
-
-
-
-# klass GAME ----------------------------------------------------------------------------------->
+# MÄNGU KLASS ----------------------------------------------------------------------------------->
 class Game:
     def __init__(self):
         pygame.init()
@@ -57,23 +54,20 @@ class Game:
         pygame.display.set_caption('Aardejaht')#ekraani nimi
         self.screen = pygame.display.set_mode((640, 480))
         self.display = pygame.Surface((320, 240))
-
         self.clock = pygame.time.Clock()
-
-        
         self.movement = [False, False]
         self.alert_flag = False
         self.alert_flag_konn = False
         self.post = False
-
         self.talk_karu = False
         self.talk_konn = False
         self.happy_karu = False
         self.happy_konn = False
+        self.juhend = False
 
         click = False
         
-        # ANIMATSIOONID -------------------------------------------------------------------------->
+        # animatsioonide asukoha määramine
         self.assets = {
             'decor': load_images('tiles/decor'),
             'grass': load_images('tiles/grass'),
@@ -83,7 +77,9 @@ class Game:
             'spawners': load_images('tiles/spawners'),
             'background': load_image('background.png'),
             'menu': load_image('menu.png'),
+            'juhend': load_image('juhend.png'),
             'text_box': load_image('text_box.png'),
+            'button_1': load_image('button_1.png'),
             'karu/idle': Animation(load_images('entities/tegelane/karu/idle'), img_dur=12),
             'karu/talk': Animation(load_images('entities/tegelane/karu/talk'), img_dur=12),
             'karu/wave': Animation(load_images('entities/tegelane/karu/wave'), img_dur=12),
@@ -101,34 +97,48 @@ class Game:
             'particle/aare_1': Animation(load_images('particles/aare_1'), img_dur=14, loop=False),
             'particle/aare_2': Animation(load_images('particles/aare_2'), img_dur=14, loop=False),
             'particle/button': Animation(load_images('particles/button'), img_dur=20),
-            #siia lisada aare particle lisana aare_1 ja aare_2
-            #            'tegelane_konn/idle': Animation(load_images('entities/tegelane/konn/idle')),
-            
+            'particle/nool': Animation(load_images('particles/nool'), img_dur=8, loop = False),   
         }
-        # MÄNGU TEGELASED ------------------------------------------------------------------------------------->
+
+        # mängu tegelased
         self.player = Player(self, (50, 50), (8, 15))
         self.karu = Karu(self, (145, -63), (8, 15), self.alert_flag)
         self.konn = Konn(self, (50, 50), (8, 15), self.alert_flag_konn)
         
-        
-
-        
-        # MAP ------------------------------------------------------------------------------------------------->
+        # map
         self.tilemap = Tilemap(self, tile_size=16)
         #self.tilemap.load('map.json')
         self.load_level(0)
-        
 
-        # OSAKESED -------------------------------------------------------------------------------------------->
+        # osakesed 
         self.particles = []
         self.aare1 = [Particle(self, 'aare_1', (760, 279), velocity=[0, -0.08], frame=0)] #aarete asukohad
         self.aare2 = [Particle(self, 'aare_2', (-700, -665), velocity=[0, -0.08], frame=0)]
+
         # nupud 
         self.nupp_karu = [Particle(self, 'button', (500, -80), velocity=[0, 0], frame=0)] # talk button for clickbait
         self.nupp_konn = [Particle(self, 'button', (-412, 145), velocity=[0, 0], frame=0)]
         self.nupp_post = [Particle(self, 'button', (120, 45), velocity=[0, 0], frame=0)]
+        self.nool = [Particle(self, 'nool', (55, 18), velocity=[0, 0], frame = 0)]
 
-    # MENÜÜ LOOP
+    # JUHEND -------------------------------------------------------------------------------------------------->
+    def display_juhend(self): 
+        while self.juhend:
+            self.screen.fill((0, 0, 0))
+            self.screen.blit(self.assets['juhend'], (0, 0))
+
+            for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN:
+                            if event.key == pygame.K_q:
+                                self.juhend = False
+                                if event.key == pygame.K_ESCAPE:
+                                    pygame.quit()
+                                    sys.exit()
+
+            pygame.display.update()
+            self.clock.tick(60)
+    
+    # MENÜÜ LOOP ------------------------------------------------------------------------------------------------>
     def main_menu(self):
         while True:
             self.screen.fill((0, 0, 0))
@@ -146,8 +156,6 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
-
-
             click = False
             for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -162,12 +170,10 @@ class Game:
                         if event.button == 1:
                             click = True
 
-
-
-
             pygame.display.update()
             self.clock.tick(60)
-
+ 
+    # mängu taasalustamine
     def load_level(self, level): # mapi laadimine
         self.tilemap.load('data/maps/' + str(level) + '.json')
 
@@ -192,38 +198,43 @@ class Game:
         # scroll variable et liigutada ekraani
         self.scroll = [0, 0]
         self.ekraani_vahetus = -30
-        click = False
     
-    # M2NGU ENDA LOOP ---------------------------------------------------------------------------------------------->
+    # MÄNGU LOOP ---------------------------------------------------------------------------------------------->
     def run(self):
+
+        # mõned lisa muutujad
         run = True
-        #self.talk = False
         aare_1_leitud = 1
         aare_2_leitud = 1
         post_aktiivne = False
-        
+ 
         while run:
-
-            #TAUST -------------------------------------------------------------------------------------------->
+            # taust -------------------------------------------------------------------------------------------->
             self.display.blit(self.assets['background'], (0, 0))
-            
-            # ANIMATSIOON M2NGU ja suremine
+
+            if self.display_juhend:
+                self.display_juhend()
+
+            # animatsioon mängu ja suremise arvestamine
+            aeg = 0  
 
             if self.happy_konn and self.happy_karu:
-                self.ekraani_vahetus += 1
-                if self.ekraani_vahetus > 30:
-                    run = False
+                if not self.talk_karu and not self.talk_konn: # kui mängija läheb välja "rääkimis box-ist"
+                    self.ekraani_vahetus += 1
+                    if self.ekraani_vahetus > 30:
+                            run = False
+
             if self.ekraani_vahetus < 0:
                 self.ekraani_vahetus += 1
             
-
             if self.player.pos[1] > 500:
                 self.kutu += 1
                 if self.kutu >= 10:
                     self.ekraani_vahetus = min(30, self.ekraani_vahetus + 1)
                 if self.kutu > 40:
                     self.load_level(0)
-            # MUUTUJAD ---------------------------------------------------------------------------------------->
+
+            # muutujad ---------------------------------------------------------------------------------------->
             my_font = Font('data/images/small_font.png')
 
             # alert on True, kui player on tegelase lähedal
@@ -243,22 +254,31 @@ class Game:
                     self.particles.append(Particle(self, 'leaf', pos, velocity=[-0.1, 0.3], frame=random.randint(0, 20))) # osakeste tekitamine toimub siin
 
             self.tilemap.render(self.display, offset=render_scroll)
+
+
+            for teade in self.nool:
+                kill = teade.update()
+                teade.render(self.display, offset=render_scroll)
+                if kill:
+                    self.nool.remove(teade)
+                
+
+
+            self.display.blit(self.assets['button_1'], (12, 10))
             
             # tegelaste renderimine -------------------------------------------------------------------------->
             
             for tegelane in self.tegelased.copy():
                 tegelane.update(self.tilemap, (0, 0))
                 tegelane.render(self.display, offset=render_scroll)
-            
-             
-
+           
             self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
             self.player.render(self.display, offset=render_scroll)
             
+
             #kontrollida, mis ruudud playeri ümber on
             #print(self.tilemap.physics_rects_around(self.player.pos))
             
-
             # puulehtede renderimine ------------------------------------------------------------------------->
             for particle in self.particles.copy():
                 kill = particle.update()
@@ -267,9 +287,7 @@ class Game:
                     particle.pos[0] += math.sin(particle.animation.frame * 0.035) * 0.3
                 if kill:
                     self.particles.remove(particle)
-
-            
-                
+ 
             # karu ja konna aarde asukohad ------------------------------------------------------------------->
             #karu aare
             if 730 <= self.player.pos[0] <= 780 and 280 <= self.player.pos[1] <= 290:
@@ -298,7 +316,6 @@ class Game:
                         self.aare2.remove(aare)    
 
             # post juhatuseks ---------------------------------------------------------------------------------->
-
             if 105 <= self.player.pos[0] <= 125 and 64 <= self.player.pos[1] <= 66:
                 if not post_aktiivne:
                     for post in self.nupp_post:
@@ -306,16 +323,14 @@ class Game:
                         post.render(self.display, offset=render_scroll)
                 else:
                     self.display.blit(self.assets['text_box'], (0, 0))
-                    my_font.render(self.display, '                            Karu maja  -->', (25, 205))
-                    my_font.render(self.display, '                        <-- Konna maja ', (25, 215))
+                    my_font.render(self.display, '                              Karu maja  -->', (25, 205))
+                    my_font.render(self.display, '                     ( alla ) Konna maja ', (25, 215))
             else:
                 post_aktiivne = False
                     
-
-
-            # karu ja konna ylesanded ------------------------------------------------------------------------->
+            # KARU JA KONNA ÜLESANDED ------------------------------------------------------------------------->
        
-            # karu ylesanne
+            # karu ülesanne
             if self.alert_flag: # on True kui player on karu juures
                 if not self.talk_karu:
                     for nupp in self.nupp_karu:
@@ -332,9 +347,9 @@ class Game:
                         my_font.render(self.display, 'kus ma otsisin head kohta magamiseks.', (25, 215))
             else:
                 self.talk_karu = False
-                #self.happy_karu = False kui tahame et ta j2tkaks enda idle animatsiooni siis saab selle tagasi panna              
+           
                     
-            # konna ylesanne
+            # konna ülesanne
             if self.alert_flag_konn: # on True kui player on karu juures
                 if not self.talk_konn:
                     for nupp in self.nupp_konn:
@@ -361,26 +376,39 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RIGHT:
                         self.movement[1] = True
+
                     if event.key == pygame.K_LEFT:
                         self.movement[0] = True
+
                     if event.key == pygame.K_UP:
                         self.player.jump()
+
                     if event.key == pygame.K_DOWN:
                         self.player.dig()
+
+                    if event.key == pygame.K_q:
+                         self.juhend = True 
+
                     if event.key == pygame.K_a:
                         self.talk_karu = True
                         self.talk_konn = True
                         post_aktiivne = True
-                    if event.key == pygame.K_z: # ajutine, ei j22 m2ngu sisse
+
+                    #### need ei jää mängu siise AJUTINE
+                    if event.key == pygame.K_z:
                         print(self.player.pos)    
-                        
-                        
+                    if event.key == pygame.K_x:
+                        self.happy_karu = True
+                        self.happy_konn = True
+                    ####
+
                     if event.key == pygame.K_ESCAPE:
                         run = False
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_RIGHT:
                         self.movement[1] = False
+
                     if event.key == pygame.K_LEFT:
                         self.movement[0] = False       
 
@@ -391,9 +419,8 @@ class Game:
                 vahetus_surf.set_colorkey((255, 255, 255))
                 self.display.blit(vahetus_surf, (0, 0))
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0)) #erkaan ekraani sees ja scaleimine
-            
+
             pygame.display.update()
             self.clock.tick(60)  #FPS
 
-
-Game().main_menu() #run
+Game().main_menu() # jooksutab seda kõige esimesena
