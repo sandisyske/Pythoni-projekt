@@ -156,7 +156,7 @@ class Player(PhysicsEntity):
         self.wall_slide = False #mida varem see seina puudutab, seda kiiremini liigub süsteem järgmise funktsiooni meetodi poole
         if (self.collisions['right'] or self.collisions['left']) and self.air_time > 4:
             self.wall_slide = True
-            self.velocity[1] = min(self.velocity[1], 0.5)
+            self.velocity[1] = min(self.velocity[1], 0.8)
             if self.collisions['right']:
                 self.flip = False
             else:

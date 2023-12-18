@@ -212,7 +212,7 @@ class Game:
             if self.happy_konn and self.happy_karu:
                 self.ekraani_vahetus += 1
                 if self.ekraani_vahetus > 30:
-                    self.load_level(0)
+                    run = False
             if self.ekraani_vahetus < 0:
                 self.ekraani_vahetus += 1
             
