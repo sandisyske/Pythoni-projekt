@@ -9,14 +9,12 @@ class PhysicsEntity:
         self.size = size
         self.velocity = [0, 0] # muutus asukoha suhtes
         self.collisions = {"up": False, "down": False, "right": False, "left": False} # sonastik, mis kontrollib, mis collisionid toimusid 
-        #ANIMATSIOONID JUURDE
         self.action = ''
         self.anim_offset = (-3, -3) # animatsioon kui pilt on natuke suurem kui pandud suurus
         self.flip = False # pildi keeramiseks
         self.set_action('idle')
         self.last_movement = [0, 0]
         
-
     # world colliding RECTANGLE
     def rect(self):
         return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
@@ -32,7 +30,7 @@ class PhysicsEntity:
 
         frame_movement = (movement[0] + self.velocity[0], movement[1] + self.velocity[1])
 
-        #COLLISION DETECTION for the X-AXIS 
+        #COLLISION DETECTION X-TELG
         self.pos[0] += frame_movement[0]
         entity_rect = self.rect()
         for rect in tilemap.physics_rects_around(self.pos):
@@ -45,7 +43,7 @@ class PhysicsEntity:
                     self.collisions['left'] = True
                 self.pos[0] = entity_rect.x
                 
-        #COLLISION DETECTION for the Y-AXIS
+        #COLLISION DETECTION Y-TELG
         self.pos[1] += frame_movement[1]
         entity_rect = self.rect()
         for rect in tilemap.physics_rects_around(self.pos):
@@ -64,9 +62,7 @@ class PhysicsEntity:
         if movement[0] < 0:
             self.flip = True
 
-        self.last_movement = movement #imput for the update function
-
-
+        self.last_movement = movement #input for the update function
         self.velocity[1] = min(5, self.velocity[1] + 0.1)
     
         if self.collisions["down"] or self.collisions["up"]:
@@ -77,14 +73,13 @@ class PhysicsEntity:
     def render(self, surf, offset = (0, 0)):
         surf.blit(pygame.transform.flip(self.animation.img(), self.flip, False), (self.pos[0] - offset[0] + self.anim_offset[0], self.pos[1] - offset[1] + self.anim_offset[1]))
 
-# tegelased
-
+# Tegelased
 class Karu(PhysicsEntity):
     def __init__(self, game, pos, size, alert_flag):
         super().__init__(game, 'karu', pos, size)
         self.alert_flag = alert_flag
         
-    def update(self, tilemap, movement=(0, 0)): #TÖÖTAB!
+    def update(self, tilemap, movement=(0, 0)):
         super().update(tilemap, movement=movement)
         if self.game.happy_karu == True:
                 self.set_action('happy')
@@ -95,7 +90,6 @@ class Karu(PhysicsEntity):
         else:
             self.set_action('idle')
 
-
     def alert(self, player_pos):
         self.player_pos = player_pos
         if 450 < player_pos[0] < 550 and -64 < player_pos[1] < -62:
@@ -103,16 +97,13 @@ class Karu(PhysicsEntity):
         else:
             self.alert_flag = False
         return self.alert_flag
-            
-
-        
 
 class Konn(PhysicsEntity):
     def __init__(self, game, pos, size, alert_flag_konn):
         super().__init__(game, 'konn', pos, size)
         self.alert_flag_konn = alert_flag_konn
         
-    def update(self, tilemap, movement=(0, 0)): #TÖÖTAB!
+    def update(self, tilemap, movement=(0, 0)):
         super().update(tilemap, movement=movement)
         if self.game.happy_konn == True:
                 self.set_action('happy')
@@ -132,7 +123,7 @@ class Konn(PhysicsEntity):
             self.alert_flag_konn = False
         return self.alert_flag_konn
     
-# player
+# Mängija
 class Player(PhysicsEntity):
     def __init__(self, game, pos, size):
         super().__init__(game, 'player', pos, size)
@@ -142,6 +133,7 @@ class Player(PhysicsEntity):
         self.dig_time = 0
         self.digging = True
 
+
     def update(self, tilemap, movement=(0, 0)):
         super().update(tilemap, movement=movement)
         
@@ -149,11 +141,9 @@ class Player(PhysicsEntity):
         self.air_time += 1
         if self.collisions['down']:
             self.air_time = 0
-            self.jumps = 2 #peale igat põranda puudutust saab 2x hüpata
+            self.jumps = 2 # peale igat põranda puudutust saab 2x hüpata
         
-            
-        
-        self.wall_slide = False #mida varem see seina puudutab, seda kiiremini liigub süsteem järgmise funktsiooni meetodi poole
+        self.wall_slide = False # mida varem see seina puudutab, seda kiiremini liigub süsteem järgmise funktsiooni meetodi poole
         if (self.collisions['right'] or self.collisions['left']) and self.air_time > 4:
             self.wall_slide = True
             self.velocity[1] = min(self.velocity[1], 0.8)
@@ -162,8 +152,7 @@ class Player(PhysicsEntity):
             else:
                 self.flip = True
             self.set_action('wall_slide')
-
-            
+   
         if not self.wall_slide:
             if self.air_time > 4:
                 self.set_action('jump')
@@ -174,11 +163,11 @@ class Player(PhysicsEntity):
             else:
                 self.set_action('idle')
         
-
         if self.velocity[0] > 0: # liigub vasakule
             self.velocity[0] = max(self.velocity[0] - 0.1, 0)
         else:                    # liigub paremale
             self.velocity[0] = min(self.velocity[0] + 0.1, 0)
+
 
     def jump(self):
         if self.wall_slide:
@@ -199,6 +188,7 @@ class Player(PhysicsEntity):
             self.jumps -= 1
             self.air_time = 5
     
+
     def dig(self):
         self.dig_time = 150
 

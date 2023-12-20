@@ -394,14 +394,6 @@ class Game:
                         self.talk_konn = True
                         post_aktiivne = True
 
-                    #### need ei jää mängu siise AJUTINE
-                    if event.key == pygame.K_z:
-                        print(self.player.pos)    
-                    if event.key == pygame.K_x:
-                        self.happy_karu = True
-                        self.happy_konn = True
-                    ####
-
                     if event.key == pygame.K_ESCAPE:
                         run = False
 
