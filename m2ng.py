@@ -97,7 +97,7 @@ class Game:
             'particle/aare_1': Animation(load_images('particles/aare_1'), img_dur=14, loop=False),
             'particle/aare_2': Animation(load_images('particles/aare_2'), img_dur=14, loop=False),
             'particle/button': Animation(load_images('particles/button'), img_dur=20),
-            'particle/nool': Animation(load_images('particles/nool'), img_dur=8, loop = False),   
+            'particle/nool': Animation(load_images('particles/nool'), img_dur=5, loop = False),   
         }
 
         # mängu tegelased
@@ -359,11 +359,11 @@ class Game:
                     if aare_2_leitud < 1: # kuidas nyyd muuta animatsiooni
                         self.happy_konn = True
                         self.display.blit(self.assets['text_box'], (0, 0))
-                        my_font.render(self.display, 'Minu vanaema kaelakee! mmmm aitah', (25, 205))
+                        my_font.render(self.display, 'Minu kadunud kaelakee!', (25, 205))
                     elif aare_2_leitud == 1:
                         self.display.blit(self.assets['text_box'], (0, 0))
-                        my_font.render(self.display, 'Kuidas see juhtus! Ma ronisin ja ronisin ... krooksusin suure kivi juures', (25, 205))
-                        my_font.render(self.display, 'kuid tagasi tulles avastasin, et kaotasin vanaema kaelakee', (25, 215))
+                        my_font.render(self.display, 'Kaotasin enda kaelakee meie kohal oleva suure kalju tippu, kui seal', (25, 205))
+                        my_font.render(self.display, 'harjutasin laulmist. Kas sa palun tood minu kadunud aarde tagasi?', (25, 215))
             else:
                 self.talk_konn = False    
 
